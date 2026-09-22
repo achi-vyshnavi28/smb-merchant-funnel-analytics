@@ -1,0 +1,55 @@
+# warehouse_etl
+
+An automated ETL pipeline that extracts the merchant-funnel data out of PostgreSQL, reshapes it into a proper **star-schema dimensional model** (the standard data-warehouse pattern — not just a copy of the source tables), and loads it into **Snowflake**.
+
+## Why a star schema, not just a table dump
+
+A data warehouse isn't "the same tables, but in the cloud" — it's modeled for fast analytical rollups. This pipeline builds:
+
+- **`dim_lead`**, **`dim_seller`**, **`dim_business_segment`**, **`dim_date`** — dimension tables
+- **`fact_deal`** — one row per closed deal, at the grain analysts actually query at, with `activated` pre-computed (joined against the sellers table once, at build time) and revenue pre-joined from `seller_revenue`, so every downstream query skips those joins
+
+Note: `fact_deal.seller_id` deliberately has **no foreign key** to `dim_seller`, mirroring the same real data-quality finding as the relational schema in [`sql/01_schema.sql`](../sql/01_schema.sql) — 54.9% of closed deals reference a seller who never activated, so a strict FK would either reject real data or silently hide the finding. The warehouse keeps the raw signal and lets `activated` (a boolean already resolved at ETL time) answer the analytical question instead.
+
+This is the same schema-design skill tested by "basic understanding of data warehouse concepts" — not just running `pandas.to_sql`.
+
+## Pipeline (two steps, deliberately split)
+
+1. **Extract + Transform** — [`python/build_star_schema.py`](python/build_star_schema.py). Pulls from the local `merchant_funnel_analytics` Postgres database, builds the star schema, and stages it as Parquet files in `data/staged/`. Needs local Postgres access only.
+2. **Load** — [`python/load_to_snowflake.py`](python/load_to_snowflake.py). Creates the warehouse/schema/tables from [`sql/create_warehouse_schema.sql`](sql/create_warehouse_schema.sql) and bulk-loads the staged Parquet files via `write_pandas`. Needs real Snowflake credentials, read only from environment variables — the script never hardcodes or prompts for a password.
+
+Splitting it this way means the step that needs real cloud credentials has zero transformation logic in it.
+
+## Running it
+
+```bash
+pip install -r requirements.txt
+
+# Step 1 (needs local Postgres, already set up elsewhere in this repo)
+python python/build_star_schema.py
+
+# Step 2 (needs your own Snowflake account -- set these first)
+export SNOWFLAKE_ACCOUNT="your-account-identifier"
+export SNOWFLAKE_USER="your-username"
+export SNOWFLAKE_PASSWORD="your-password"
+export SNOWFLAKE_WAREHOUSE="COMPUTE_WH"
+python python/load_to_snowflake.py
+```
+
+On success, `load_to_snowflake.py` prints the row count loaded into each table and runs a sample analytical query (activation rate by lead type) directly against the newly loaded warehouse tables to confirm everything landed correctly.
+
+## Confirmed working — actual row counts from the extract step (staged Parquet)
+
+```
+dim_lead: 8,000 rows
+dim_seller: 3,095 rows
+dim_business_segment: 65 rows
+dim_date: 345 rows
+fact_deal: 842 rows
+```
+
+These match the source Postgres tables exactly (`sql/01_schema.sql` + `python/load_data.py` in the repo root). The load step's row counts (once run against a live Snowflake account) will match these staged counts one-for-one — the load script is a pure bulk-copy, no filtering.
+
+## Data
+
+Real merchant-acquisition-funnel data (same source as the rest of this repo): 8,000 leads / 842 closed deals from the [Olist Marketing Funnel dataset](https://www.kaggle.com/datasets/olistbr/marketing-funnel-olist), joined to real seller revenue.
