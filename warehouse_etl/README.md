@@ -38,17 +38,34 @@ python python/load_to_snowflake.py
 
 On success, `load_to_snowflake.py` prints the row count loaded into each table and runs a sample analytical query (activation rate by lead type) directly against the newly loaded warehouse tables to confirm everything landed correctly.
 
-## Confirmed working — actual row counts from the extract step (staged Parquet)
+## Confirmed working — actual output from a live run
 
 ```
-dim_lead: 8,000 rows
-dim_seller: 3,095 rows
-dim_business_segment: 65 rows
-dim_date: 345 rows
-fact_deal: 842 rows
+Connected as user=VYSHNAVIACHI  role=ACCOUNTADMIN  warehouse=COMPUTE_WH
+Creating database/schema/tables...
+Loaded dim_lead: 8,000 rows
+Loaded dim_seller: 3,095 rows
+Loaded dim_business_segment: 65 rows
+Loaded dim_date: 345 rows
+Loaded fact_deal: 842 rows
+
+Verifying with a warehouse-style analytical query...
+('online_big', 126, 79, Decimal('62.70'))
+('online_medium', 332, 172, Decimal('51.81'))
+(None, 6, 3, Decimal('50.00'))
+('online_top', 14, 6, Decimal('42.86'))
+('online_beginner', 57, 21, Decimal('36.84'))
+('online_small', 77, 28, Decimal('36.36'))
+('industry', 123, 41, Decimal('33.33'))
+('offline', 104, 30, Decimal('28.85'))
+('other', 3, 0, Decimal('0.00'))
+
+Done. Data is live in Snowflake under MERCHANT_FUNNEL_WAREHOUSE.ANALYTICS.
 ```
 
-These match the source Postgres tables exactly (`sql/01_schema.sql` + `python/load_data.py` in the repo root). The load step's row counts (once run against a live Snowflake account) will match these staged counts one-for-one — the load script is a pure bulk-copy, no filtering.
+Row counts match the PostgreSQL source exactly, and activation rate by lead type matches the SQL/Power BI/Excel findings elsewhere in this repo (`online_big` highest at 62.7%, `offline` lowest at 28.85%) — this is a real, verified round trip through a live Snowflake warehouse, not just code that "should work."
+
+**Note:** one early run hit `Failed to cast variant value ... to DATE` on `dim_lead.first_contact_date` — a pandas `Timestamp` column serializes to epoch-microseconds internally, which Snowflake's `write_pandas` can't auto-cast into a `DATE` column. Fixed in [`build_star_schema.py`](python/build_star_schema.py) by converting to a plain `datetime.date` with `.dt.date` before staging (same fix `dim_date` already used).
 
 ## Data
 

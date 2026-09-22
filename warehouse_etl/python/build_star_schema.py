@@ -28,10 +28,16 @@ ENGINE = create_engine("postgresql+psycopg2://postgres:postgres@localhost:5432/m
 
 
 def build_dim_lead() -> pd.DataFrame:
-    return pd.read_sql(
+    df = pd.read_sql(
         "SELECT mql_id, first_contact_date, landing_page_id, origin FROM marketing_qualified_leads", ENGINE,
         parse_dates=["first_contact_date"],
     )
+    # Plain datetime.date objects (not pandas Timestamps) -- Snowflake's
+    # write_pandas/COPY INTO can't auto-cast a raw Timestamp's underlying
+    # epoch-microseconds representation into a DATE column, but a plain
+    # date object maps cleanly (same fix as dim_date below).
+    df["first_contact_date"] = df["first_contact_date"].dt.date
+    return df
 
 
 def build_dim_seller() -> pd.DataFrame:

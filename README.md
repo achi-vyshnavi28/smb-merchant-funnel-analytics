@@ -80,7 +80,7 @@ The `.pbix` connects live to a local PostgreSQL instance across all 4 tables (`m
 
 ## Bonus: Data Warehouse / Automated ETL (Snowflake)
 
-[`warehouse_etl/`](warehouse_etl/) extracts the funnel data from PostgreSQL, models it as a proper **star schema** (dimension tables for lead/seller/business-segment/date + a fact table at the closed-deal grain — not just a copy of the source tables), and loads it into a **Snowflake** data warehouse via an automated Python pipeline. Extract step confirmed working: all 8,000 leads / 842 deals staged and verified against the source Postgres tables. Full write-up: [`warehouse_etl/README.md`](warehouse_etl/README.md).
+[`warehouse_etl/`](warehouse_etl/) extracts the funnel data from PostgreSQL, models it as a proper **star schema** (dimension tables for lead/seller/business-segment/date + a fact table at the closed-deal grain — not just a copy of the source tables), and loads it into a live **Snowflake** data warehouse via an automated Python pipeline. Confirmed working end-to-end: all 8,000 leads / 842 deals loaded and verified with a live analytical query (activation rate by lead type, matching the rest of this repo's findings exactly). Full write-up: [`warehouse_etl/README.md`](warehouse_etl/README.md).
 
 ## Bonus: NoSQL / Document Database (MongoDB)
 
