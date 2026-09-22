@@ -6,7 +6,7 @@ A merchant-acquisition funnel analytics project built to demonstrate a **Data An
 
 **Start here:** [`docs/case_study.md`](docs/case_study.md) — a narrative write-up of the analysis (business question → findings → quantified revenue impact → recommendations), not just raw output.
 
-**Live dashboard:** run `streamlit run streamlit_app/app.py` locally (see below), or deploy to Streamlit Community Cloud — includes a live activation-opportunity what-if calculator.
+**Live dashboard:** [smb-merchant-funnel-analytics-5ey63g5wxmxidc6v3sj3kg.streamlit.app](https://smb-merchant-funnel-analytics-5ey63g5wxmxidc6v3sj3kg.streamlit.app) — interactive, includes a live activation-opportunity what-if calculator.
 
 ## Skills demonstrated → where to find them
 
@@ -21,7 +21,7 @@ A merchant-acquisition funnel analytics project built to demonstrate a **Data An
 | Predictive modeling | Logistic regression predicting deal activation at sign-up time (58.8% accuracy, 0.645 ROC-AUC) — a genuine supervised model, not just descriptive stats |
 | Excel / spreadsheet modeling | [`excel/funnel_financial_model.xlsx`](excel/funnel_financial_model.xlsx) — live formulas (funnel-rate calculations, activation-opportunity what-if model) |
 | Real analytical case study | [`docs/case_study.md`](docs/case_study.md) — business question → findings → quantified revenue impact → recommendations |
-| Live dashboard link | Interactive Streamlit + Plotly app ([`streamlit_app/app.py`](streamlit_app/app.py)), including a live activation-opportunity what-if calculator |
+| Live dashboard link | **[smb-merchant-funnel-analytics-5ey63g5wxmxidc6v3sj3kg.streamlit.app](https://smb-merchant-funnel-analytics-5ey63g5wxmxidc6v3sj3kg.streamlit.app)** — interactive Streamlit + Plotly app ([`streamlit_app/app.py`](streamlit_app/app.py)), including a live activation-opportunity what-if calculator |
 | Proof of work | This repo — real data, real queries, real dashboard, all reproducible from a fresh clone |
 
 ## Data source

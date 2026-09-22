@@ -16,6 +16,7 @@ To answer that with real data, this project uses the [Olist Marketing Funnel dat
 - **Python** (Pandas, NumPy, Matplotlib/Seaborn, SciPy, scikit-learn) for cleaning, exploratory analysis, statistical testing (chi-square test of independence), and a logistic regression model that predicts activation at the moment a deal closes ([`python/eda_analysis.py`](../python/eda_analysis.py)).
 - **Excel** for turning the activation gap into a financial opportunity model a revenue-ops stakeholder can adjust live ([`excel/funnel_financial_model.xlsx`](../excel/funnel_financial_model.xlsx)).
 - **Power BI** for a live, explorable version of the same story, connected directly to the database ([`dashboard/funnel_activation_dashboard.pbix`](../dashboard/funnel_activation_dashboard.pbix)).
+- **Streamlit** for a public, interactive version of this dashboard, including a live activation-opportunity what-if calculator: **[smb-merchant-funnel-analytics-5ey63g5wxmxidc6v3sj3kg.streamlit.app](https://smb-merchant-funnel-analytics-5ey63g5wxmxidc6v3sj3kg.streamlit.app)**.
 
 Every number below comes from a query or script in this repo — none of it is asserted without a source.
 
