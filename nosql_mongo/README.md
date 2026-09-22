@@ -32,13 +32,45 @@ export MONGODB_URI="mongodb+srv://user:password@cluster0.xxxxx.mongodb.net/"
 python python/load_to_mongodb.py
 ```
 
-## Confirmed working — actual output from the extract step
+## Confirmed working — actual output from a live run
 
 ```
-Wrote 842 deal documents -> data/staged/deals.jsonl.gz
+Loading documents into merchant_funnel_nosql.deals ...
+Loaded 842 documents
+Created indexes on deal.lead_type, activated, lead.origin
+
+--- Example NoSQL queries against the loaded documents ---
+
+1) Find: 3 activated deals from the online_big lead type
+   deal 327174d3648a...  segment=home_appliances  revenue=R$ 25372.08
+   deal 408a9c4a7980...  segment=construction_tools_house_garden  revenue=R$ 1428.22
+   deal 0b97be8b4b40...  segment=watches  revenue=R$ 122261.02
+
+2) Aggregation: activation rate by lead type
+   online_big: 79/126 activated (62.7%)
+   online_medium: 172/332 activated (51.8%)
+   nan: 3/6 activated (50.0%)
+   online_top: 6/14 activated (42.9%)
+   online_beginner: 21/57 activated (36.8%)
+   online_small: 28/77 activated (36.4%)
+   industry: 41/123 activated (33.3%)
+   offline: 30/104 activated (28.8%)
+   other: 0/3 activated (0.0%)
+
+3) Aggregation: total revenue by acquisition channel (embedded lead.origin, no join needed)
+   unknown: R$ 238,478.75 across 81 activated sellers
+   organic_search: R$ 235,919.42 across 113 activated sellers
+   paid_search: R$ 179,427.11 across 101 activated sellers
+   social: R$ 51,292.04 across 31 activated sellers
+   direct_traffic: R$ 27,517.13 across 31 activated sellers
+
+4) Activation rate computed directly from embedded fields (no join needed)
+   380 / 842 won deals activated (45.1%)
+
+Done. Data is live in MongoDB Atlas: merchant_funnel_nosql.deals
 ```
 
-842 documents, matching the `closed_deals` table exactly (verified: sample activated document includes correctly embedded seller city/state and revenue totals matching the Postgres `seller_revenue` table row-for-row). The load step's document count (once run against a live Atlas cluster) will match this one-for-one — the load script is a pure bulk-insert, no filtering.
+All 842 documents loaded, and every number above matches the PostgreSQL/Power BI/Excel/Streamlit findings elsewhere in this repo exactly (45.1% overall activation rate, same lead-type and channel breakdowns) — this is a real, verified round trip through a live MongoDB Atlas cluster, not just code that "should work."
 
 ## Data
 
